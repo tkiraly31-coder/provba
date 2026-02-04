@@ -1,3 +1,5 @@
+import { useState, useMemo } from 'react';
+
 export interface FilterState {
   client: string[];
   regulatoryType: string[];
@@ -22,78 +24,99 @@ interface VolumeFiltersProps {
   onClearFilters: () => void;
 }
 
+const filterConfig: { key: keyof FilterState; label: string }[] = [
+  { key: 'client', label: 'Client' },
+  { key: 'regulatoryType', label: 'Regulatory type' },
+  { key: 'transactionType', label: 'Transaction type' },
+  { key: 'merchant', label: 'Merchant' },
+  { key: 'merchantJurisdiction', label: 'Merchant jurisdiction' },
+  { key: 'merchantIndustry', label: 'Merchant industry' },
+  { key: 'useCase', label: 'Use case' },
+  { key: 'tpp', label: 'TPP' },
+  { key: 'currency', label: 'Currency' },
+  { key: 'sourceBankJurisdiction', label: 'Source bank jurisdiction' },
+  { key: 'transactionCategory', label: 'Transaction category' },
+  { key: 'transactionSubType', label: 'Transaction sub type' },
+];
+
 export const VolumeFilters = ({ filters, uniqueValues, onFilterChange, onClearFilters }: VolumeFiltersProps) => {
-  const filterConfig: { key: keyof FilterState; label: string }[] = [
-    { key: 'client', label: 'Client' },
-    { key: 'regulatoryType', label: 'Regulatory Type' },
-    { key: 'transactionType', label: 'Transaction Type' },
-    { key: 'merchant', label: 'Merchant' },
-    { key: 'merchantJurisdiction', label: 'Merchant Jurisdiction' },
-    { key: 'merchantIndustry', label: 'Merchant Industry' },
-    { key: 'useCase', label: 'Use Case' },
-    { key: 'tpp', label: 'TPP' },
-    { key: 'currency', label: 'Currency' },
-    { key: 'sourceBankJurisdiction', label: 'Source Bank Jurisdiction' },
-    { key: 'transactionCategory', label: 'Transaction Category' },
-    { key: 'transactionSubType', label: 'Transaction Sub Type' },
-  ];
+  const [search, setSearch] = useState('');
 
   const activeFilterCount = Object.values(filters).reduce((sum, arr) => sum + arr.length, 0);
 
+  const filteredOptions = useMemo(() => {
+    if (!search.trim()) return uniqueValues;
+    const q = search.toLowerCase().trim();
+    const out = {} as typeof uniqueValues;
+    for (const k of Object.keys(uniqueValues) as (keyof FilterState)[]) {
+      out[k] = uniqueValues[k].filter((v) => String(v).toLowerCase().includes(q));
+    }
+    return out;
+  }, [uniqueValues, search]);
+
   return (
-    <div className="card">
-      <div className="filtersTopRow">
-        <div>
-          <h3 className="filtersTitle">Filters</h3>
-          <div className="cardSub">
-            {activeFilterCount > 0 ? (
-              <span className="pill">
-                Active selections: <span className="pillStrong">{activeFilterCount}</span>
-              </span>
-            ) : (
-              <span className="pill">No filters applied</span>
-            )}
-          </div>
-        </div>
+    <div className="filterPanel">
+      <div className="filterPanelHeader">
+        <h3 className="filterPanelTitle">Filters</h3>
         {activeFilterCount > 0 && (
-          <button className="btn btnDanger" onClick={onClearFilters}>
+          <button type="button" className="btn btnPrimary" onClick={onClearFilters} title="Clear all">
             Clear
           </button>
         )}
       </div>
 
-      <div className="filtersGrid">
+      <input
+        type="text"
+        className="filterSearch"
+        placeholder="Search..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        aria-label="Search filter options"
+      />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
         {filterConfig.map(({ key, label }) => (
-          <div key={key}>
-            <div className="filterLabel">{label}</div>
+          <div key={key} className="filterRow">
+            <label className="filterLabel" htmlFor={`filter-${key}`}>
+              {label}
+            </label>
             <select
+              id={`filter-${key}`}
               className="select"
               multiple
               value={filters[key]}
               onChange={(e) => {
                 const options = Array.from(e.target.options);
-                const selectedValues = options.filter(option => option.selected).map(option => option.value);
+                const selectedValues = options.filter((o) => o.selected).map((o) => o.value);
                 onFilterChange(key, selectedValues);
               }}
             >
-              {uniqueValues[key]?.map(value => (
-                <option key={value} value={value}>
-                  {value || '(empty)'}
-                </option>
-              ))}
+              {filteredOptions[key]?.length === 0 ? (
+                <option value="">No matches</option>
+              ) : (
+                filteredOptions[key]?.map((value) => (
+                  <option key={value} value={value}>
+                    {value || '(empty)'}
+                  </option>
+                ))
+              )}
             </select>
             {filters[key].length > 0 && (
-              <div className="cardSub" style={{ marginTop: 6 }}>
+              <span style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2, display: 'block' }}>
                 {filters[key].length} selected
-              </div>
+              </span>
             )}
           </div>
         ))}
       </div>
 
-      <div className="hintBox">
-        <strong>Tip:</strong> Hold Ctrl (Windows) or Cmd (Mac) to select multiple values.
-      </div>
+      <button
+        type="button"
+        className={`filterClearBtn ${activeFilterCount > 0 ? 'active' : ''}`}
+        onClick={onClearFilters}
+      >
+        Clear all filters
+      </button>
     </div>
   );
 };

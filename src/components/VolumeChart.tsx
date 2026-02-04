@@ -96,9 +96,7 @@ export const VolumeChart = ({ data, onPointClick }: VolumeChartProps) => {
               boxShadow: '0 12px 36px rgba(15, 23, 42, 0.12)',
             }}
           />
-          <Legend 
-            wrapperStyle={{ fontSize: '14px' }}
-          />
+          <Legend wrapperStyle={{ fontSize: '12px', color: 'rgba(230,237,243,0.9)' }} />
           <Area
             type="monotone" 
             dataKey="volume" 

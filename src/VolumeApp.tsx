@@ -164,36 +164,34 @@ function VolumeApp() {
       </div>
 
       <div className="container">
-        <div className="layout">
-          <div>
-            <VolumeFilters
-              filters={filters}
-              uniqueValues={uniqueValues}
-              onFilterChange={handleFilterChange}
-              onClearFilters={handleClearFilters}
-            />
+        <div className="mainContent">
+          <div className="card">
+            <div className="cardHeader">
+              <h2 className="cardTitle">Overview</h2>
+              <p className="cardSub">Filtered dataset snapshot.</p>
+            </div>
+            <div className="cardBody">
+              <VolumeSummary data={filteredData} />
+            </div>
           </div>
 
-          <div style={{ display: 'grid', gap: 20 }}>
-            <div className="card">
-              <div className="cardHeader">
-                <h2 className="cardTitle">Overview</h2>
-                <p className="cardSub">A quick snapshot of the currently filtered dataset.</p>
-              </div>
-              <div className="cardBody">
-                <VolumeSummary data={filteredData} />
-              </div>
-            </div>
+          <div className="card">
+            <VolumeChart data={chartData} onPointClick={handleChartPointClick} />
+          </div>
 
-            <div className="card">
-              <VolumeChart data={chartData} onPointClick={handleChartPointClick} />
-            </div>
-
-            <div className="footerNote">
-              Showing <strong>{filteredData.length.toLocaleString()}</strong> of <strong>{allData.length.toLocaleString()}</strong> rows.
-            </div>
+          <div className="footerNote">
+            Showing <strong>{filteredData.length.toLocaleString()}</strong> of <strong>{allData.length.toLocaleString()}</strong> rows.
           </div>
         </div>
+
+        <aside className="filterSidebar">
+          <VolumeFilters
+            filters={filters}
+            uniqueValues={uniqueValues}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+          />
+        </aside>
 
         <TopClientsModal
           isOpen={isTopClientsOpen}
