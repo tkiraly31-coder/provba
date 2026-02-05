@@ -9,6 +9,14 @@ export interface ForecastPoint {
   target: number;
 }
 
+/** Forecast over time with segment dimension (for filtering before aggregation) */
+export interface ForecastPointBySegment {
+  month: string;
+  segment: string;
+  forecast: number;
+  target: number;
+}
+
 export interface PipelineStage {
   name: string;
   value: number;
@@ -49,14 +57,56 @@ export function getSalesKPIs(): SalesKPIs {
   };
 }
 
-export function getForecastOverTime(): ForecastPoint[] {
-  const months = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
-  let f = 2100000;
-  let t = 2400000;
-  return months.map((month, i) => {
-    f += randomInRange(80000, 180000);
-    t = Math.round(t * (1 + (i % 3 === 0 ? 0.02 : 0)));
-    return { month, forecast: f, target: t };
+const FORECAST_MONTHS = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+
+function buildForecastOverTimeBySegment(): ForecastPointBySegment[] {
+  const segments = ['Bank & Bank Tech', 'Fintechs', 'Gateways', 'Large Merchants', 'HVHM'];
+  const shareOfTotal = [0.28, 0.24, 0.18, 0.18, 0.12];
+  const out: ForecastPointBySegment[] = [];
+  let baseF = 2100000;
+  let baseT = 2400000;
+  for (let m = 0; m < FORECAST_MONTHS.length; m++) {
+    baseF += randomInRange(80000, 180000);
+    baseT = Math.round(baseT * (1 + (m % 3 === 0 ? 0.02 : 0)));
+    const month = FORECAST_MONTHS[m];
+    for (let s = 0; s < segments.length; s++) {
+      const variance = 0.92 + (s * 17 % 100) / 500;
+      out.push({
+        month,
+        segment: segments[s],
+        forecast: Math.round(baseF * shareOfTotal[s] * variance),
+        target: Math.round(baseT * shareOfTotal[s] * (1 + (s % 2 === 0 ? 0.01 : -0.01))),
+      });
+    }
+  }
+  return out;
+}
+
+const CACHED_FORECAST_BY_SEGMENT = buildForecastOverTimeBySegment();
+
+/** Forecast over time per segment (for segment filter). Use getForecastOverTime() for aggregated chart data. */
+export function getForecastOverTimeBySegment(): ForecastPointBySegment[] {
+  return CACHED_FORECAST_BY_SEGMENT;
+}
+
+/** Aggregated forecast over time. Pass selectedSegments to filter by segment (empty = all). */
+export function getForecastOverTime(selectedSegments?: string[]): ForecastPoint[] {
+  const bySegment = getForecastOverTimeBySegment();
+  const filter =
+    selectedSegments && selectedSegments.length > 0
+      ? (row: ForecastPointBySegment) => selectedSegments.includes(row.segment)
+      : () => true;
+  const filtered = bySegment.filter(filter);
+  const byMonth = new Map<string, { forecast: number; target: number }>();
+  for (const row of filtered) {
+    const cur = byMonth.get(row.month) ?? { forecast: 0, target: 0 };
+    cur.forecast += row.forecast;
+    cur.target += row.target;
+    byMonth.set(row.month, cur);
+  }
+  return FORECAST_MONTHS.map((month) => {
+    const cur = byMonth.get(month) ?? { forecast: 0, target: 0 };
+    return { month, forecast: cur.forecast, target: cur.target };
   });
 }
 
@@ -72,12 +122,14 @@ export interface ARRByMonthPoint {
 export interface ARRLicenseItem {
   clientName: string;
   amount: number;
+  segment: string;
 }
 
 /** Client-level detail for Minimum revenue */
 export interface ARRMinimumItem {
   clientName: string;
   amount: number;
+  segment: string;
 }
 
 /** Client-level detail for Volume-driven revenue (transactions × price point) */
@@ -86,6 +138,7 @@ export interface ARRVolumeDrivenItem {
   transactions: number;
   pricePoint: number; // in £
   amount: number;    // transactions * pricePoint
+  segment: string;
 }
 
 export interface ARRMonthDetail {
@@ -113,7 +166,7 @@ function splitAmount(total: number, parts: number): number[] {
   return out;
 }
 
-/** Returns chart data and per-month client detail (detail amounts sum to chart totals) */
+/** Returns chart data and per-month client detail (detail amounts sum to chart totals). Each item has segment for filtering in UI. */
 export function getForecastARRWithDetails(): {
   chartData: ARRByMonthPoint[];
   detailsByMonth: Record<string, ARRMonthDetail>;
@@ -137,10 +190,12 @@ export function getForecastARRWithDetails(): {
       license: licenseParts.map((amount, i) => ({
         clientName: SAMPLE_CLIENTS[(months.indexOf(month) + i) % SAMPLE_CLIENTS.length],
         amount,
+        segment: randomChoice([...SEGMENT_OPTIONS]),
       })),
       minimum: minimumParts.map((amount, i) => ({
         clientName: SAMPLE_CLIENTS[(months.indexOf(month) + i + 2) % SAMPLE_CLIENTS.length],
         amount,
+        segment: randomChoice([...SEGMENT_OPTIONS]),
       })),
       volumeDriven: volumeAmounts.map((amount, i) => {
         const pricePoint = randomInRange(5, 50);
@@ -151,6 +206,7 @@ export function getForecastARRWithDetails(): {
           transactions,
           pricePoint,
           amount: actualAmount,
+          segment: randomChoice([...SEGMENT_OPTIONS]),
         };
       }),
     };
@@ -174,18 +230,37 @@ export function getPipelineByStage(): PipelineStage[] {
   ];
 }
 
-const DEAL_COLORS = ['#5B4B8A', '#7B6BA8', '#9B8BC4', '#BBAED8', '#DBD0EC', '#E8E0F4'];
+const DEAL_COLORS = ['#1e1b4b', '#3730a3', '#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd'];
 
-export function getDealDistribution(): DealSegment[] {
-  const segments = [
-    { name: 'Enterprise', value: 45 },
-    { name: 'Mid-Market', value: 28 },
-    { name: 'SMB', value: 18 },
-    { name: 'Other', value: 9 },
-  ];
-  return segments.map((s, i) => ({
+/** Segment options used across the dashboard (for filters and data) */
+export const SEGMENT_OPTIONS = ['Bank & Bank Tech', 'Fintechs', 'Gateways', 'Large Merchants', 'HVHM'] as const;
+export type SegmentOption = (typeof SEGMENT_OPTIONS)[number];
+
+/** Random percentages that sum to 100 for the 5 segments */
+function randomSegmentDistribution(): number[] {
+  const raw = SEGMENT_OPTIONS.map(() => Math.random());
+  const sum = raw.reduce((a, b) => a + b, 0);
+  const scaled = raw.map((r) => Math.round((r / sum) * 100));
+  const diff = 100 - scaled.reduce((a, b) => a + b, 0);
+  if (diff !== 0) scaled[0] = Math.max(0, scaled[0] + diff);
+  return scaled;
+}
+
+const CACHED_DISTRIBUTION = randomSegmentDistribution();
+
+export function getDealDistribution(selectedSegments?: string[]): DealSegment[] {
+  const segments = SEGMENT_OPTIONS.map((name, i) => ({ name, value: CACHED_DISTRIBUTION[i] }));
+  const filtered =
+    selectedSegments && selectedSegments.length > 0
+      ? segments.filter((s) => selectedSegments.includes(s.name))
+      : segments;
+  const total = filtered.reduce((a, s) => a + s.value, 0);
+  const normalized = total > 0 ? filtered.map((s) => ({ ...s, value: Math.round((s.value / total) * 100) })) : filtered;
+  const sum = normalized.reduce((a, s) => a + s.value, 0);
+  if (sum !== 100 && normalized.length > 0) normalized[0].value += 100 - sum;
+  return normalized.map((s) => ({
     ...s,
-    fill: DEAL_COLORS[i % DEAL_COLORS.length],
+    fill: DEAL_COLORS[SEGMENT_OPTIONS.indexOf(s.name as SegmentOption) % DEAL_COLORS.length],
   }));
 }
 
@@ -196,6 +271,7 @@ export interface PipelineDeal {
   acv: number;
   closeDate: string; // YYYY-MM
   stage?: string;
+  segment: string;
 }
 
 const DEAL_NAMES = [
@@ -227,15 +303,16 @@ export function getPipelineDeals2026(): PipelineDeal[] {
   let id = 1;
   for (const closeDate of months) {
     const count = randomInRange(1, 4);
-    for (let i = 0; i < count; i++) {
-      const baseName = randomChoice(DEAL_NAMES);
-      const name = count > 1 && i > 0 ? `${baseName} – ${closeDate}` : baseName;
-      deals.push({
+  for (let i = 0; i < count; i++) {
+    const baseName = randomChoice(DEAL_NAMES);
+    const name = count > 1 && i > 0 ? `${baseName} – ${closeDate}` : baseName;
+    deals.push({
         id: `deal-${id++}`,
         name,
         acv: randomInRange(40000, 280000),
         closeDate,
         stage: randomChoice(['Proposal', 'Negotiation', 'Closed Won']),
+        segment: randomChoice([...SEGMENT_OPTIONS]),
       });
     }
   }
@@ -310,7 +387,6 @@ export interface ClientDeal {
 }
 
 const DEAL_OWNERS = ['Alex Morgan', 'Jordan Smith', 'Sam Taylor', 'Casey Lee', 'Riley Brown'];
-const SEGMENTS = ['Enterprise', 'Mid-Market', 'SMB', 'Other'];
 const DEAL_NAME_PREFIXES = ['Acme Corp', 'Beta Inc', 'Gamma Ltd', 'Delta Solutions', 'Epsilon Group', 'Zeta Industries', 'Eta Partners', 'Theta Systems', 'Iota Consulting', 'Kappa Finance', 'Lambda Tech', 'Mu Industries'];
 
 export function getClientDeals(): ClientDeal[] {
@@ -327,7 +403,7 @@ export function getClientDeals(): ClientDeal[] {
       id: `client-deal-${id++}`,
       dealName: `${prefix}${suffix}`,
       closeDate,
-      segment: SEGMENTS[i % SEGMENTS.length],
+      segment: randomChoice([...SEGMENT_OPTIONS]),
       acv: randomInRange(30, 350) * 1000,
       estimatedTransactionsPerMonth: randomInRange(500, 50000),
       dealOwner: DEAL_OWNERS[i % DEAL_OWNERS.length],
@@ -395,7 +471,7 @@ export function getDealsByQuarter(quarter: QuarterId): QuarterDeal[] {
       clientName,
       dealName: `${clientName} – ${['Platform', 'Enterprise', 'Standard', 'Premium'][i % 4]}`,
       closeDate,
-      segment: SEGMENTS[i % SEGMENTS.length],
+      segment: randomChoice([...SEGMENT_OPTIONS]),
       acv,
       arrForecast,
       annualizedTransactionForecast,

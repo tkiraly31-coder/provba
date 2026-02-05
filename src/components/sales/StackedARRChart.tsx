@@ -17,9 +17,9 @@ interface StackedARRChartProps {
   detailsByMonth: Record<string, ARRMonthDetail>;
 }
 
-const LICENSE_COLOR = '#5B4B8A';
-const MINIMUM_COLOR = '#7B6BA8';
-const VOLUME_COLOR = '#9B8BC4';
+const LICENSE_COLOR = 'var(--sales-chart-1)';
+const MINIMUM_COLOR = 'var(--sales-bg-alt)';
+const VOLUME_COLOR = 'var(--sales-chart-3)';
 
 function formatARR(value: number): string {
   if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(1)}M`;

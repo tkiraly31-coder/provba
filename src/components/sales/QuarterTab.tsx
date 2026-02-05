@@ -8,7 +8,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { getDealsByQuarter, type QuarterId } from '../../data/salesMockData';
+import { useSalesData } from '../../contexts/SalesDataContext';
+import type { QuarterId } from '../../data/salesMockData';
+import { SegmentMultiselect } from './SegmentMultiselect';
 
 type BarMetric = 'acv' | 'arrForecast' | 'annualizedTransactionForecast';
 
@@ -52,9 +54,16 @@ interface QuarterTabProps {
 }
 
 export function QuarterTab({ tabId }: QuarterTabProps) {
+  const { getQuarterDeals } = useSalesData();
   const quarter = tabIdToQuarter(tabId);
-  const deals = useMemo(() => getDealsByQuarter(quarter), [quarter]);
+  const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
   const [barMetric, setBarMetric] = useState<BarMetric>('acv');
+
+  const allDeals = useMemo(() => getQuarterDeals(quarter), [quarter, getQuarterDeals]);
+  const deals = useMemo(() => {
+    if (selectedSegments.length === 0) return allDeals;
+    return allDeals.filter((d) => selectedSegments.includes(d.segment));
+  }, [allDeals, selectedSegments]);
 
   const chartData = useMemo(() => {
     const byClient = new Map<string, { acv: number; arrForecast: number; annualizedTransactionForecast: number }>();
@@ -98,6 +107,12 @@ export function QuarterTab({ tabId }: QuarterTabProps) {
           Deals anticipated to close in this quarter. Per-client bar chart and deal table below.
         </p>
       </header>
+
+      <div className="sales-accounts-filters sales-chart-card">
+        <div className="sales-accounts-filters-row">
+          <SegmentMultiselect selectedSegments={selectedSegments} onChange={setSelectedSegments} />
+        </div>
+      </div>
 
       <div className="sales-chart-card sales-quarter-chart">
         <div className="sales-chart-header sales-chart-header-with-switch">

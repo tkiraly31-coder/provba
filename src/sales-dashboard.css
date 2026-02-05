@@ -1,28 +1,32 @@
-/* Sales Dashboard – modern SaaS look (light, purple, rounded cards) */
+/* Sales Dashboard – Token.io brand palette (dark indigo, pale blue, white, bright blue) + DM Sans */
 
 :root {
-  --sales-primary: #5B4B8A;
-  --sales-primary-hover: #4a3d70;
-  --sales-accent: #E8D86A;
-  --sales-accent-soft: #f5f0c9;
-  --sales-bg: #F8F6F0;
-  --sales-bg-alt: #EEF2F7;
+  --sales-primary: #1e1b4b;
+  --sales-primary-hover: #16133a;
+  --sales-accent: #0ea5e9;
+  --sales-accent-soft: #e0f2fe;
+  --sales-bg: #e8f0f7;
+  --sales-bg-alt: #d6e8f2;
   --sales-surface: #ffffff;
-  --sales-border: rgba(91, 75, 138, 0.12);
-  --sales-text: #2d2640;
-  --sales-text-secondary: #5c5468;
-  --sales-muted: #8b8499;
-  --sales-shadow: 0 4px 20px rgba(91, 75, 138, 0.08);
-  --sales-shadow-hover: 0 8px 28px rgba(91, 75, 138, 0.12);
+  --sales-border: rgba(30, 27, 75, 0.12);
+  --sales-text: #1e1b4b;
+  --sales-text-secondary: #475569;
+  --sales-muted: #64748b;
+  --sales-shadow: 0 4px 20px rgba(30, 27, 75, 0.08);
+  --sales-shadow-hover: 0 8px 28px rgba(30, 27, 75, 0.12);
   --sales-radius: 16px;
   --sales-radius-sm: 12px;
+  /* Stacked chart segments */
+  --sales-chart-1: #1e1b4b;
+  --sales-chart-2: #3730a3;
+  --sales-chart-3: #0ea5e9;
 }
 
 .sales-app {
   display: flex;
   min-height: 100vh;
   background: var(--sales-bg);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   color: var(--sales-text);
 }
 
@@ -56,8 +60,9 @@
   width: 40px;
   height: 40px;
   border-radius: var(--sales-radius-sm);
-  background: linear-gradient(135deg, var(--sales-primary), #7B6BA8);
+  object-fit: contain;
   flex-shrink: 0;
+  display: block;
 }
 
 .sales-sidebar-title {
@@ -101,7 +106,7 @@
 }
 
 .sales-sidebar-tab.active {
-  background: rgba(91, 75, 138, 0.1);
+  background: rgba(30, 27, 75, 0.1);
   color: var(--sales-primary);
 }
 
@@ -479,6 +484,10 @@
   margin-bottom: 20px;
 }
 
+.sales-accounts-filters.sales-chart-card {
+  overflow: visible;
+}
+
 .sales-accounts-filters-row {
   display: flex;
   flex-wrap: wrap;
@@ -516,7 +525,7 @@
 .sales-filter-select:focus {
   outline: none;
   border-color: var(--sales-primary);
-  box-shadow: 0 0 0 2px rgba(91, 75, 138, 0.15);
+  box-shadow: 0 0 0 2px rgba(30, 27, 75, 0.15);
 }
 
 .sales-filter-input::placeholder {
@@ -546,6 +555,83 @@
 .sales-filter-clear:hover {
   background: var(--sales-border);
   color: var(--sales-text);
+}
+
+/* Segment multiselect */
+.sales-segment-multiselect {
+  position: relative;
+}
+
+.sales-segment-trigger {
+  appearance: none;
+  cursor: pointer;
+  text-align: left;
+  min-width: 120px;
+}
+
+.sales-segment-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  max-width: 280px;
+  background: var(--sales-surface);
+  border: 1px solid var(--sales-border);
+  border-radius: var(--sales-radius-sm);
+  box-shadow: var(--sales-shadow-hover);
+  z-index: 100;
+  padding: 8px 0;
+}
+
+.sales-segment-dropdown-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 8px;
+  border-bottom: 1px solid var(--sales-border);
+  margin-bottom: 4px;
+}
+
+.sales-segment-dropdown-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--sales-bg-alt);
+  color: var(--sales-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sales-segment-dropdown-btn:hover {
+  background: var(--sales-border);
+  color: var(--sales-text);
+}
+
+.sales-segment-dropdown-list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.sales-segment-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--sales-text);
+}
+
+.sales-segment-option:hover {
+  background: var(--sales-bg-alt);
+}
+
+.sales-segment-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sales-primary);
+  cursor: pointer;
 }
 
 .sales-accounts-table-wrap {
@@ -593,7 +679,7 @@
 }
 
 .sales-accounts-table tbody tr:hover {
-  background: rgba(91, 75, 138, 0.04);
+  background: rgba(30, 27, 75, 0.04);
 }
 
 .sales-accounts-cell-name {

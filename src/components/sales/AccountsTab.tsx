@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
-import { getClientDeals } from '../../data/salesMockData';
+import { useSalesData } from '../../contexts/SalesDataContext';
+import { SegmentMultiselect } from './SegmentMultiselect';
 
 interface AccountsFilters {
   dealName: string;
   closeDate: string;
-  segment: string;
+  segments: string[];
   acvMin: string;
   acvMax: string;
   transactionsMin: string;
@@ -12,7 +13,6 @@ interface AccountsFilters {
   dealOwner: string;
 }
 
-const SEGMENTS = ['', 'Enterprise', 'Mid-Market', 'SMB', 'Other'];
 const DEAL_OWNERS = ['', 'Alex Morgan', 'Jordan Smith', 'Sam Taylor', 'Casey Lee', 'Riley Brown'];
 const CLOSE_MONTHS = [
   '', '2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06',
@@ -33,12 +33,13 @@ function formatACV(value: number): string {
 }
 
 export function AccountsTab() {
-  const deals = useMemo(() => getClientDeals(), []);
+  const { getClientDealsList } = useSalesData();
+  const deals = useMemo(() => getClientDealsList(), [getClientDealsList]);
 
   const [filters, setFilters] = useState<AccountsFilters>({
     dealName: '',
     closeDate: '',
-    segment: '',
+    segments: [],
     acvMin: '',
     acvMax: '',
     transactionsMin: '',
@@ -55,7 +56,7 @@ export function AccountsTab() {
         const dealMonth = d.closeDate.slice(0, 7);
         if (dealMonth !== filters.closeDate) return false;
       }
-      if (filters.segment && d.segment !== filters.segment) return false;
+      if (filters.segments.length > 0 && !filters.segments.includes(d.segment)) return false;
       if (filters.acvMin) {
         const min = parseInt(filters.acvMin, 10);
         if (!Number.isNaN(min) && d.acv < min) return false;
@@ -77,7 +78,7 @@ export function AccountsTab() {
     });
   }, [deals, filters]);
 
-  const updateFilter = <K extends keyof AccountsFilters>(key: K, value: string) => {
+  const updateFilter = <K extends keyof AccountsFilters>(key: K, value: string | string[]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -115,18 +116,10 @@ export function AccountsTab() {
               ))}
             </select>
           </div>
-          <div className="sales-filter-field">
-            <label className="sales-filter-label">Segment</label>
-            <select
-              className="sales-filter-select"
-              value={filters.segment}
-              onChange={(e) => updateFilter('segment', e.target.value)}
-            >
-              {SEGMENTS.map((s) => (
-                <option key={s || 'all'} value={s}>{s || 'All'}</option>
-              ))}
-            </select>
-          </div>
+          <SegmentMultiselect
+            selectedSegments={filters.segments}
+            onChange={(segments) => updateFilter('segments', segments)}
+          />
           <div className="sales-filter-field">
             <label className="sales-filter-label">ACV min (£)</label>
             <input
@@ -190,7 +183,7 @@ export function AccountsTab() {
               onClick={() => setFilters({
                 dealName: '',
                 closeDate: '',
-                segment: '',
+                segments: [],
                 acvMin: '',
                 acvMax: '',
                 transactionsMin: '',

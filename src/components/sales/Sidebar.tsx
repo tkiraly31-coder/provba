@@ -28,7 +28,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   return (
     <aside className="sales-sidebar">
       <div className="sales-sidebar-brand">
-        <div className="sales-sidebar-logo" />
+        <img src="/token-logo.png" alt="Token" className="sales-sidebar-logo" />
         <div>
           <div className="sales-sidebar-title">Sales</div>
           <div className="sales-sidebar-subtitle">Commercial Performance</div>
