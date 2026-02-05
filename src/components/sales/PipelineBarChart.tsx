@@ -7,6 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { PipelineStage } from '../../data/salesMockData';
 
 interface PipelineBarChartProps {
@@ -33,10 +34,12 @@ export function PipelineBarChart({ data }: PipelineBarChartProps) {
             <XAxis dataKey="name" tick={{ fill: 'var(--sales-text-secondary)', fontSize: 11 }} />
             <YAxis tickFormatter={formatValue} tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }} />
             <Tooltip
-              formatter={(value: number | undefined, name?: string) => [
-                value != null ? (name === 'value' ? formatValue(value) : value) : '—',
-                name === 'value' ? 'Value' : 'Deals',
-              ]}
+              formatter={(value: ValueType, name: NameType) => {
+                const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
+                const nameStr = String(name ?? '');
+                const display = Number.isFinite(n) ? (nameStr === 'value' ? formatValue(n) : String(n)) : '—';
+                return [display, nameStr === 'value' ? 'Value' : 'Deals'];
+              }}
               contentStyle={{
                 background: 'var(--sales-surface)',
                 border: '1px solid var(--sales-border)',

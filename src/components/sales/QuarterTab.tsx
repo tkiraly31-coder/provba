@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import { useSalesData } from '../../contexts/SalesDataContext';
 import type { QuarterId } from '../../data/salesMockData';
 import { SegmentMultiselect } from './SegmentMultiselect';
@@ -160,7 +161,10 @@ export function QuarterTab({ tabId }: QuarterTabProps) {
               <XAxis type="number" tickFormatter={formatAxis} tick={{ fill: 'var(--sales-text-secondary)', fontSize: 11 }} />
               <YAxis type="category" dataKey="clientName" width={96} tick={{ fill: 'var(--sales-text-secondary)', fontSize: 11 }} />
               <Tooltip
-                formatter={(value: number | undefined) => [value != null ? formatTooltip(value) : '—', metricLabel]}
+                formatter={(value: ValueType, name: NameType) => {
+                  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
+                  return [Number.isFinite(n) ? formatTooltip(n) : '—', String(name ?? metricLabel)];
+                }}
                 contentStyle={{
                   background: 'var(--sales-surface)',
                   border: '1px solid var(--sales-border)',

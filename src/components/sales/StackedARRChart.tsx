@@ -9,6 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { ARRByMonthPoint, ARRMonthDetail } from '../../data/salesMockData';
 import { ARRDetailModal } from './ARRDetailModal';
 
@@ -25,6 +26,12 @@ function formatARR(value: number): string {
   if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `£${(value / 1_000).toFixed(0)}K`;
   return `£${value}`;
+}
+
+function tooltipValueToNumber(value: ValueType): number {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') return Number(value);
+  return 0;
 }
 
 function getMonthFromBarClick(data: unknown): string | null {
@@ -91,21 +98,21 @@ export function StackedARRChart({ data, detailsByMonth }: StackedARRChartProps) 
                 tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }}
               />
               <Tooltip
-                formatter={(value: number | undefined, name?: string) => [
-                  value != null ? formatARR(value) : '—',
-                  name ?? '',
-                ]}
+                formatter={(value: ValueType, name: NameType) => {
+                  const n = tooltipValueToNumber(value);
+                  return [Number.isFinite(n) ? formatARR(n) : '—', String(name ?? '')];
+                }}
                 contentStyle={{
                   background: 'var(--sales-surface)',
                   border: '1px solid var(--sales-border)',
                   borderRadius: 12,
                 }}
                 labelStyle={{ color: 'var(--sales-text)' }}
-                labelFormatter={(label) => label}
+                labelFormatter={(label) => String(label ?? '')}
               />
               <Legend
                 wrapperStyle={{ fontSize: 12 }}
-                formatter={(value) => <span style={{ color: 'var(--sales-text)' }}>{value}</span>}
+                formatter={(value: unknown) => <span style={{ color: 'var(--sales-text)' }}>{String(value ?? '')}</span>}
               />
               <Bar dataKey="license" name="License" stackId="arr" fill={LICENSE_COLOR} radius={[0, 0, 0, 0]} cursor="pointer" onClick={handleBarClick} isAnimationActive={false} />
               <Bar dataKey="minimum" name="Minimum" stackId="arr" fill={MINIMUM_COLOR} radius={[0, 0, 0, 0]} cursor="pointer" onClick={handleBarClick} isAnimationActive={false} />

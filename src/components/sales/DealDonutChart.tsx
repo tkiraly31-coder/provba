@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { DealSegment } from '../../data/salesMockData';
 
 interface DealDonutChartProps {
@@ -30,7 +31,10 @@ export function DealDonutChart({ data }: DealDonutChartProps) {
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: number | undefined) => [value != null ? `${value}%` : '—', 'Share']}
+              formatter={(value: ValueType, name: NameType) => {
+                const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
+                return [Number.isFinite(n) ? `${n}%` : '—', String(name ?? 'Share')];
+              }}
               contentStyle={{
                 background: 'var(--sales-surface)',
                 border: '1px solid var(--sales-border)',
@@ -40,7 +44,7 @@ export function DealDonutChart({ data }: DealDonutChartProps) {
             />
             <Legend
               wrapperStyle={{ fontSize: 12 }}
-              formatter={(value) => <span style={{ color: 'var(--sales-text)' }}>{value}</span>}
+              formatter={(value: unknown) => <span style={{ color: 'var(--sales-text)' }}>{String(value ?? '')}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

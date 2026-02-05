@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { ClientWinsPoint } from '../../data/salesMockData';
 
 interface ClientWinsLineChartProps {
@@ -75,11 +76,11 @@ export function ClientWinsLineChart({ data }: ClientWinsLineChartProps) {
               tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }}
             />
             <Tooltip
-              formatter={(value: number | undefined) => [
-                value != null ? String(value) : '—',
-                valueLabel,
-              ]}
-              labelFormatter={(label) => label}
+              formatter={(value: ValueType, name: NameType) => {
+                const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
+                return [Number.isFinite(n) ? String(n) : '—', String(name ?? valueLabel)];
+              }}
+              labelFormatter={(label) => String(label ?? '')}
               contentStyle={{
                 background: 'var(--sales-surface)',
                 border: '1px solid var(--sales-border)',

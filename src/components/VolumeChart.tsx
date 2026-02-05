@@ -1,4 +1,5 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 
 interface VolumeChartProps {
   data: { date: string; volume: number }[];
@@ -86,8 +87,11 @@ export const VolumeChart = ({ data, onPointClick }: VolumeChartProps) => {
             style={{ fontSize: '12px' }}
             tickFormatter={formatNumber}
           />
-          <Tooltip 
-            formatter={(value) => [formatNumber(Number(value ?? 0)), 'Volume']}
+          <Tooltip
+            formatter={(value: ValueType, name: NameType) => {
+              const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
+              return [formatNumber(Number.isFinite(n) ? n : 0), String(name ?? 'Volume')];
+            }}
             contentStyle={{
               backgroundColor: 'white',
               border: '1px solid rgba(15, 23, 42, 0.10)',

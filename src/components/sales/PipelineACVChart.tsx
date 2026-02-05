@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { ACVByMonth, PipelineDeal } from '../../data/salesMockData';
 import { DealsModal } from './DealsModal';
 
@@ -135,17 +136,17 @@ export function PipelineACVChart({ monthlyData, dealsByMonth }: PipelineACVChart
                 tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }}
               />
               <Tooltip
-                formatter={(value: number | undefined) => [
-                  value != null ? formatACV(value) : '—',
-                  tooltipLabel,
-                ]}
+                formatter={(value: ValueType, name: NameType) => {
+                  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
+                  return [Number.isFinite(n) ? formatACV(n) : '—', String(name ?? tooltipLabel)];
+                }}
                 contentStyle={{
                   background: 'var(--sales-surface)',
                   border: '1px solid var(--sales-border)',
                   borderRadius: 12,
                 }}
                 labelStyle={{ color: 'var(--sales-text)' }}
-                labelFormatter={(label) => label}
+                labelFormatter={(label) => String(label ?? '')}
               />
               <Bar
                 dataKey="totalACV"

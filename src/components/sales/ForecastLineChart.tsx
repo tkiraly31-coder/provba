@@ -8,6 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { ForecastPoint } from '../../data/salesMockData';
 
 interface ForecastLineChartProps {
@@ -34,8 +35,11 @@ export function ForecastLineChart({ data }: ForecastLineChartProps) {
             <XAxis dataKey="month" tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }} />
             <YAxis tickFormatter={formatAxis} tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }} />
             <Tooltip
-              formatter={(value: number | undefined) => [value != null ? formatAxis(value) : '—', '']}
-              labelFormatter={(label) => `Month: ${label}`}
+              formatter={(value: ValueType, name: NameType) => {
+                const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
+                return [Number.isFinite(n) ? formatAxis(n) : '—', String(name ?? '')];
+              }}
+              labelFormatter={(label) => `Month: ${String(label ?? '')}`}
               contentStyle={{
                 background: 'var(--sales-surface)',
                 border: '1px solid var(--sales-border)',
@@ -45,7 +49,7 @@ export function ForecastLineChart({ data }: ForecastLineChartProps) {
             />
             <Legend
               wrapperStyle={{ fontSize: 12 }}
-              formatter={(value) => <span style={{ color: 'var(--sales-text)' }}>{value}</span>}
+              formatter={(value: unknown) => <span style={{ color: 'var(--sales-text)' }}>{String(value ?? '')}</span>}
             />
             <Line
               type="monotone"
