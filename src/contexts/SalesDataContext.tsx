@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { loadGoogleSheetsData, isGoogleSheetsConfigured } from '../data/googleSheetsLoader';
 import type { LoadedSalesData } from '../data/googleSheetsLoader';
+import { loadApiData, isApiConfigured } from '../data/apiLoader';
 import {
   getSalesKPIs,
   getForecastOverTime,
@@ -25,9 +26,11 @@ import {
 import type { QuarterId } from '../data/salesMockData';
 
 type SalesDataContextValue = {
-  /** When true, Google Sheets is configured and we're loading or using it */
+  /** When true, SQL API is configured and we're loading or using it */
+  useApi: boolean;
+  /** When true, Google Sheets is configured (only used if API is not) */
   useGoogleSheets: boolean;
-  /** Loaded data from Google (null until loaded or when using mock) */
+  /** Loaded data from API or Google (null until loaded or when using mock) */
   googleData: LoadedSalesData | null;
   loading: boolean;
   error: string | null;
@@ -51,9 +54,19 @@ export function SalesDataProvider({ children }: { children: ReactNode }) {
   const [googleData, setGoogleData] = useState<LoadedSalesData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const useGoogleSheets = isGoogleSheetsConfigured();
+  const useApi = isApiConfigured();
+  const useGoogleSheets = !useApi && isGoogleSheetsConfigured();
 
   useEffect(() => {
+    if (useApi) {
+      setLoading(true);
+      setError(null);
+      loadApiData()
+        .then(setGoogleData)
+        .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+        .finally(() => setLoading(false));
+      return;
+    }
     if (!useGoogleSheets) return;
     setLoading(true);
     setError(null);
@@ -61,7 +74,7 @@ export function SalesDataProvider({ children }: { children: ReactNode }) {
       .then(setGoogleData)
       .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoading(false));
-  }, [useGoogleSheets]);
+  }, [useApi, useGoogleSheets]);
 
   const getKPIs = useCallback(() => {
     if (googleData?.salesKPIs) return googleData.salesKPIs;
@@ -174,6 +187,7 @@ export function SalesDataProvider({ children }: { children: ReactNode }) {
   );
 
   const value: SalesDataContextValue = {
+    useApi,
     useGoogleSheets,
     googleData,
     loading,

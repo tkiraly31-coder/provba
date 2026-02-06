@@ -1,0 +1,16 @@
+{
+  "name": "sales-dashboard-api",
+  "version": "1.0.0",
+  "description": "SQLite-backed API for Sales Dashboard",
+  "main": "api.js",
+  "scripts": {
+    "start": "node api.js",
+    "seed": "node seed.js",
+    "dev": "node api.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}

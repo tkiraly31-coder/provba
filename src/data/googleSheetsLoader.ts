@@ -207,23 +207,6 @@ export async function loadGoogleSheetsData(): Promise<LoadedSalesData> {
     })),
     detailsByMonth: buildDetailsByMonth(arrLicRows, arrMinRows, arrVolRows),
     pipelineDeal: pipelineDealRows.map((r) => ({
-      clientName: String(r.clientName ?? ''),
-      amount: num(r.amount),
-      segment: String(r.segment ?? ''),
-    })),
-    arrMinimumDetail: arrMinRows.map((r) => ({
-      clientName: String(r.clientName ?? ''),
-      amount: num(r.amount),
-      segment: String(r.segment ?? ''),
-    })),
-    arrVolumeDetail: arrVolRows.map((r) => ({
-      clientName: String(r.clientName ?? ''),
-      transactions: num(r.transactions),
-      pricePoint: num(r.pricePoint),
-      amount: num(r.amount),
-      segment: String(r.segment ?? ''),
-    })),
-    pipelineDeal: pipelineDealRows.map((r) => ({
       id: String(r.id ?? ''),
       name: String(r.name ?? ''),
       acv: num(r.acv),
