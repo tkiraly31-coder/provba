@@ -34,7 +34,7 @@ export function PipelineBarChart({ data }: PipelineBarChartProps) {
             <XAxis dataKey="name" tick={{ fill: 'var(--sales-text-secondary)', fontSize: 11 }} />
             <YAxis tickFormatter={formatValue} tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }} />
             <Tooltip
-              formatter={(value: ValueType, name: NameType) => {
+              formatter={(value: ValueType | undefined, name?: NameType) => {
                 const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
                 const nameStr = String(name ?? '');
                 const display = Number.isFinite(n) ? (nameStr === 'value' ? formatValue(n) : String(n)) : '—';

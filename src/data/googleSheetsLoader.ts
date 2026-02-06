@@ -15,9 +15,6 @@ import type {
   DealSegment,
   ARRByMonthPoint,
   ARRMonthDetail,
-  ARRLicenseItem,
-  ARRMinimumItem,
-  ARRVolumeDrivenItem,
   PipelineDeal,
   ACVByMonth,
   ClientWinsPoint,
@@ -121,21 +118,6 @@ export interface LoadedSalesData {
 export async function loadGoogleSheetsData(): Promise<LoadedSalesData> {
   const id = googleSheetsConfig.spreadsheetId;
   if (!id) throw new Error('Google Sheets spreadsheetId not configured');
-
-  const empty: LoadedSalesData = {
-    salesKPIs: null,
-    forecastPoint: [],
-    forecastPointBySegment: [],
-    pipelineStage: [],
-    dealSegment: [],
-    arrByMonthPoint: [],
-    detailsByMonth: {},
-    pipelineDeal: [],
-    acvByMonth: [],
-    clientWinsPoint: [],
-    clientDeal: [],
-    quarterDeal: [],
-  };
 
   const sheet = async (name: string) => {
     try {

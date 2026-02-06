@@ -31,7 +31,7 @@ export function DealDonutChart({ data }: DealDonutChartProps) {
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: ValueType, name: NameType) => {
+              formatter={(value: ValueType | undefined, name?: NameType) => {
                 const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
                 return [Number.isFinite(n) ? `${n}%` : '—', String(name ?? 'Share')];
               }}

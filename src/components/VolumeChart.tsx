@@ -88,7 +88,7 @@ export const VolumeChart = ({ data, onPointClick }: VolumeChartProps) => {
             tickFormatter={formatNumber}
           />
           <Tooltip
-            formatter={(value: ValueType, name: NameType) => {
+            formatter={(value: ValueType | undefined, name?: NameType) => {
               const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
               return [formatNumber(Number.isFinite(n) ? n : 0), String(name ?? 'Volume')];
             }}

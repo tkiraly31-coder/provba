@@ -28,7 +28,8 @@ function formatARR(value: number): string {
   return `£${value}`;
 }
 
-function tooltipValueToNumber(value: ValueType): number {
+function tooltipValueToNumber(value: ValueType | undefined): number {
+  if (value === undefined) return NaN;
   if (typeof value === 'number') return value;
   if (typeof value === 'string') return Number(value);
   return 0;
@@ -98,7 +99,7 @@ export function StackedARRChart({ data, detailsByMonth }: StackedARRChartProps) 
                 tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }}
               />
               <Tooltip
-                formatter={(value: ValueType, name: NameType) => {
+                formatter={(value: ValueType | undefined, name?: NameType) => {
                   const n = tooltipValueToNumber(value);
                   return [Number.isFinite(n) ? formatARR(n) : '—', String(name ?? '')];
                 }}

@@ -136,7 +136,7 @@ export function PipelineACVChart({ monthlyData, dealsByMonth }: PipelineACVChart
                 tick={{ fill: 'var(--sales-text-secondary)', fontSize: 12 }}
               />
               <Tooltip
-                formatter={(value: ValueType, name: NameType) => {
+                formatter={(value: ValueType | undefined, name?: NameType) => {
                   const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
                   return [Number.isFinite(n) ? formatACV(n) : '—', String(name ?? tooltipLabel)];
                 }}

@@ -161,7 +161,7 @@ export function QuarterTab({ tabId }: QuarterTabProps) {
               <XAxis type="number" tickFormatter={formatAxis} tick={{ fill: 'var(--sales-text-secondary)', fontSize: 11 }} />
               <YAxis type="category" dataKey="clientName" width={96} tick={{ fill: 'var(--sales-text-secondary)', fontSize: 11 }} />
               <Tooltip
-                formatter={(value: ValueType, name: NameType) => {
+                formatter={(value: ValueType | undefined, name?: NameType) => {
                   const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : 0;
                   return [Number.isFinite(n) ? formatTooltip(n) : '—', String(name ?? metricLabel)];
                 }}

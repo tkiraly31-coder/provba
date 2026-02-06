@@ -12,7 +12,6 @@ import { loadApiData, isApiConfigured } from '../data/apiLoader';
 import {
   getSalesKPIs,
   getForecastOverTime,
-  getForecastOverTimeBySegment,
   getPipelineByStage,
   getDealDistribution,
   getForecastARRWithDetails,
@@ -114,9 +113,10 @@ export function SalesDataProvider({ children }: { children: ReactNode }) {
   const getDealDist = useCallback(
     (selectedSegments?: string[]) => {
       if (googleData && googleData.dealSegment.length > 0) {
+        const segs = selectedSegments;
         const list =
-          selectedSegments?.length > 0
-            ? googleData.dealSegment.filter((s) => selectedSegments.includes(s.name))
+          segs && segs.length > 0
+            ? googleData.dealSegment.filter((s) => segs.includes(s.name))
             : googleData.dealSegment;
         const total = list.reduce((a, s) => a + s.value, 0);
         const normalized =
