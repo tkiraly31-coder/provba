@@ -1,21 +1,34 @@
 # Loading dashboard data from Google Sheets
 
-You can keep your data in a **Google Spreadsheet** (e.g. after uploading `Data_Structures_Reference.xlsx` and filling it in). The dashboard will read it via Google’s “Publish to web” CSV export — no API key required.
-
-**Important:** I (the AI) cannot open or read your Google Sheet directly. The **app** can, once you publish it and add the IDs to the config.
+You can keep your data in a **Google Spreadsheet** (from the project’s Excel template). The dashboard reads it via Google’s “Publish to web” CSV export — **no API key or sign-in required**.
 
 ---
 
-## 1. Put your data in Google Sheets
+## 1. Get the Excel template and fill it
 
-1. Upload **Data_Structures_Reference.xlsx** to Google Drive and open it in Google Sheets,  
-   **or** create a new spreadsheet and copy the sheet names and column headers from that file.
-2. Use the same **sheet tab names** as in the Excel (e.g. `SalesKPIs`, `ForecastPoint`, `PipelineDeal`, …).
-3. Fill in your data. Column headers in row 1 must match the field names (e.g. `month`, `forecast`, `target`).
+1. **Create/regenerate the template** (optional; one already exists):
+   ```bash
+   npm run create-data-excel
+   ```
+   This writes **`Data_Structures_Reference.xlsx`** in the project root with:
+   - An **Instructions** sheet (steps for upload and connection)
+   - A **Reference** sheet (data types and field names)
+   - One sheet per data type (e.g. `SalesKPIs`, `ForecastPoint`, `PipelineDeal`, …) with **example rows and correct column headers**.
+
+2. Open **Data_Structures_Reference.xlsx** in Excel or a spreadsheet app. Fill in your data on each sheet. **Row 1 must stay as the header row** (column names like `month`, `forecast`, `target`). Do not rename the **sheet tabs** (e.g. keep `SalesKPIs`, not “KPI”).
 
 ---
 
-## 2. Publish the spreadsheet so the app can read it
+## 2. Put your data in Google Sheets
+
+1. **Upload** `Data_Structures_Reference.xlsx` to Google Drive and open it with **Google Sheets**,  
+   **or** in Google Sheets: **File → Import → Upload** and select the .xlsx file.
+2. Keep the same **sheet tab names** (e.g. `SalesKPIs`, `ForecastPoint`, `PipelineDeal`, …).
+3. Edit and add your data. Column headers in row 1 must match the field names (e.g. `month`, `forecast`, `target`).
+
+---
+
+## 3. Publish the spreadsheet so the app can read it
 
 1. In Google Sheets: **File → Share → Publish to web**.
 2. Under **Link**, choose **Entire document** (or pick specific sheets if you prefer).
@@ -27,7 +40,7 @@ You can keep your data in a **Google Spreadsheet** (e.g. after uploading `Data_S
 
 ---
 
-## 3. Get the Spreadsheet ID and sheet GIDs
+## 4. Get the Spreadsheet ID and sheet GIDs
 
 - **Spreadsheet ID**  
   From the sheet URL:
@@ -42,40 +55,42 @@ You can keep your data in a **Google Spreadsheet** (e.g. after uploading `Data_S
 
 ---
 
-## 4. Configure the dashboard
+## 5. Configure the dashboard
 
-1. Open **`src/data/googleSheetsConfig.ts`**.
-2. Set **`spreadsheetId`** to your Spreadsheet ID (string).
+**Option A – Environment variable (recommended for Spreadsheet ID)**  
+1. Copy `.env.example` to `.env`.  
+2. Set **`VITE_GOOGLE_SHEETS_ID`** to your Spreadsheet ID (the part between `/d/` and `/edit` in the sheet URL).  
+3. Open **`src/data/googleSheetsConfig.ts`** and set **`sheetGids`** for each sheet you use: click the sheet tab in Google Sheets, copy the number after `#gid=` from the URL into the matching key (e.g. `SalesKPIs: '123456789'`).
+
+**Option B – Config file only**  
+1. Open **`src/data/googleSheetsConfig.ts`**.  
+2. Set **`FALLBACK_SPREADSHEET_ID`** (at the top) to your Spreadsheet ID.  
 3. Set **`sheetGids`** so each sheet name you use has its GID (string), for example:
 
 ```ts
-export const googleSheetsConfig = {
-  spreadsheetId: '1ABC...xyz',  // your ID
-
-  sheetGids: {
-    SalesKPIs: '0',
-    ForecastPoint: '123456789',
-    ForecastPointBySegment: '234567890',
-    PipelineStage: '345678901',
-    DealSegment: '456789012',
-    ARRByMonthPoint: '567890123',
-    ARR_LicenseDetail: '678901234',
-    ARR_MinimumDetail: '789012345',
-    ARR_VolumeDetail: '890123456',
-    PipelineDeal: '901234567',
-    ACVByMonth: '012345678',
-    ClientWinsPoint: '111222333',
-    ClientDeal: '222333444',
-    QuarterDeal: '333444555',
-  },
-};
+sheetGids: {
+  SalesKPIs: '0',
+  ForecastPoint: '123456789',
+  ForecastPointBySegment: '234567890',
+  PipelineStage: '345678901',
+  DealSegment: '456789012',
+  ARRByMonthPoint: '567890123',
+  ARR_LicenseDetail: '678901234',
+  ARR_MinimumDetail: '789012345',
+  ARR_VolumeDetail: '890123456',
+  PipelineDeal: '901234567',
+  ACVByMonth: '012345678',
+  ClientWinsPoint: '111222333',
+  ClientDeal: '222333444',
+  QuarterDeal: '333444555',
+},
 ```
 
 You only need to fill in the sheets you use. Leave a sheet’s GID as `''` if you don’t use it; the app will fall back to mock data for that part.
 
 ---
 
-## 5. Run the app
+## 6. Run the app
 
 - Run the dashboard as usual (`npm run dev`).
 - If **`spreadsheetId`** is set and at least one **`sheetGids`** entry is set, the app will load data from Google Sheets on startup.
@@ -83,7 +98,7 @@ You only need to fill in the sheets you use. Leave a sheet’s GID as `''` if yo
 
 ---
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 - **“Failed to fetch” / CORS**  
   The sheet must be **Published to web** (step 2). The export URL is public; the app does not sign in to your Google account.

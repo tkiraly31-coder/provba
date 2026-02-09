@@ -23,9 +23,9 @@ const MINIMUM_COLOR = 'var(--sales-bg-alt)';
 const VOLUME_COLOR = 'var(--sales-chart-3)';
 
 function formatARR(value: number): string {
-  if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `£${(value / 1_000).toFixed(0)}K`;
-  return `£${value}`;
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
+  return `$${value}`;
 }
 
 function tooltipValueToNumber(value: ValueType | undefined): number {

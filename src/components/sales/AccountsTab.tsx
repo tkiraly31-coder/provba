@@ -27,9 +27,9 @@ function formatDate(iso: string): string {
 }
 
 function formatACV(value: number): string {
-  if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `£${(value / 1_000).toFixed(0)}K`;
-  return `£${value}`;
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
+  return `$${value}`;
 }
 
 export function AccountsTab() {
@@ -121,7 +121,7 @@ export function AccountsTab() {
             onChange={(segments) => updateFilter('segments', segments)}
           />
           <div className="sales-filter-field">
-            <label className="sales-filter-label">ACV min (£)</label>
+            <label className="sales-filter-label">ACV min ($)</label>
             <input
               type="number"
               className="sales-filter-input sales-filter-input-num"
@@ -132,7 +132,7 @@ export function AccountsTab() {
             />
           </div>
           <div className="sales-filter-field">
-            <label className="sales-filter-label">ACV max (£)</label>
+            <label className="sales-filter-label">ACV max ($)</label>
             <input
               type="number"
               className="sales-filter-input sales-filter-input-num"

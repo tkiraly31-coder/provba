@@ -8,13 +8,13 @@ interface ARRDetailModalProps {
 }
 
 function formatAmount(value: number): string {
-  if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(2)}M`;
-  if (value >= 1_000) return `£${(value / 1_000).toFixed(0)}K`;
-  return `£${value}`;
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
+  return `$${value}`;
 }
 
 function formatPrice(value: number): string {
-  return `£${value.toFixed(2)}`;
+  return `$${value.toFixed(2)}`;
 }
 
 export function ARRDetailModal({ isOpen, month, details, onClose }: ARRDetailModalProps) {

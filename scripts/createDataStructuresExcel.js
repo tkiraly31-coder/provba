@@ -27,23 +27,63 @@ function addSheetFromRows(wb, name, rows) {
 
 const workbook = XLSX.utils.book_new();
 
+// ---- Instructions (first sheet – for upload to Google Sheets) ----
+const instructionsRows = [
+  ['Sales Dashboard – Data template for Google Sheets'],
+  [''],
+  ['1. FILL IN YOUR DATA'],
+  ['   Use the other sheets in this workbook. Row 1 must be the header row (column names).'],
+  ['   Do not change the sheet tab names (e.g. SalesKPIs, ForecastPoint, PipelineDeal).'],
+  [''],
+  ['2. UPLOAD TO GOOGLE SHEETS'],
+  ['   • Upload this file to Google Drive, then open with Google Sheets'],
+  ['   • Or: In Google Sheets, File → Import → Upload and select this .xlsx file'],
+  [''],
+  ['3. PUBLISH TO WEB'],
+  ['   • File → Share → Publish to web'],
+  ['   • Choose "Entire document" or each sheet individually'],
+  ['   • Format: Comma-separated values (.csv)'],
+  ['   • Click Publish'],
+  [''],
+  ['4. GET YOUR IDs'],
+  ['   • Spreadsheet ID: from the URL .../d/SPREADSHEET_ID/edit'],
+  ['   • Sheet GID: click each sheet tab; URL ends with #gid=123456 (that number is the GID)'],
+  [''],
+  ['5. CONFIGURE THE DASHBOARD'],
+  ['   • Set VITE_GOOGLE_SHEETS_ID in .env (or FALLBACK_SPREADSHEET_ID in src/data/googleSheetsConfig.ts)'],
+  ['   • In googleSheetsConfig.ts set each sheetGids entry to that sheet\'s GID'],
+  ['   • See GOOGLE_SHEETS_SETUP.md for full steps'],
+  [''],
+  ['Sheet names the dashboard expects (use exact names):'],
+  ['SalesKPIs, ForecastPoint, ForecastPointBySegment, PipelineStage, DealSegment,'],
+  ['ARRByMonthPoint, ARR_LicenseDetail, ARR_MinimumDetail, ARR_VolumeDetail,'],
+  ['PipelineDeal, ACVByMonth, ClientWinsPoint, ClientDeal, QuarterDeal'],
+  [''],
+  ['Key sheets for Overview: SalesKPIs, ARRByMonthPoint, PipelineDeal, ClientWinsPoint.'],
+  ['PipelineDeal.stage drives "Pipeline by deal stage"; segment drives "Deal distribution by segment".'],
+];
+addSheetFromRows(workbook, 'Instructions', instructionsRows);
+
 // ---- Reference sheet: type name, where used, fields ----
 const referenceRows = [
   ['Data Type', 'Used In', 'Field Names / Notes'],
-  ['SalesKPIs', 'Overview – KPI cards', 'forecastARR, pipelineValue, closedWon, winRate, forecastARRDelta?, pipelineValueDelta?, closedWonDelta?, winRateDelta?'],
-  ['ForecastPoint', 'Overview – Forecast line chart', 'month, forecast, target'],
-  ['ForecastPointBySegment', 'Overview – Forecast (with segment filter)', 'month, segment, forecast, target'],
-  ['PipelineStage', 'Overview – Pipeline bar chart', 'name, value, count'],
-  ['DealSegment', 'Overview – Deal donut chart', 'name, value (%), fill (color)'],
-  ['ARRByMonthPoint', 'Forecast tab – Stacked ARR chart', 'month, license, minimum, volumeDriven'],
-  ['ARRMonthDetail', 'Forecast tab – Modal detail (per month)', 'license[], minimum[], volumeDriven[] – see ARR detail sheets'],
-  ['PipelineDeal', 'Pipeline tab – source for ACV chart', 'id, name, acv, closeDate (YYYY-MM), stage?, segment'],
-  ['ACVByMonth', 'Pipeline tab – ACV bar chart', 'month, monthKey (YYYY-MM), totalACV'],
-  ['ClientWinsPoint', 'Pipeline tab – Client wins line', 'period, wins'],
+  ['SalesKPIs', 'Overview – KPI cards (Forecast Y-E ARR, Closed-Won, Pipeline Value)', 'forecastARR, pipelineValue, closedWon, winRate, forecastARRDelta?, pipelineValueDelta?, closedWonDelta?, winRateDelta?'],
+  ['ForecastPoint', 'Optional – aggregated forecast over time', 'month, forecast, target'],
+  ['ForecastPointBySegment', 'Optional – forecast by segment (for segment filter)', 'month, segment, forecast, target'],
+  ['PipelineStage', 'Optional – pipeline totals by stage (name, value, count)', 'name, value, count'],
+  ['DealSegment', 'Optional – segment share % and color (or use PipelineDeal; Overview donut uses deal count from PipelineDeal)', 'name, value (%), fill (color)'],
+  ['ARRByMonthPoint', 'Overview cumulative chart + Forecast tab + YTD / Current ARR KPIs', 'month, license, minimum, volumeDriven'],
+  ['ARR_LicenseDetail', 'Forecast tab – modal detail per month', 'month, clientName, amount, segment'],
+  ['ARR_MinimumDetail', 'Forecast tab – modal detail per month', 'month, clientName, amount, segment'],
+  ['ARR_VolumeDetail', 'Forecast tab – modal detail per month', 'month, clientName, transactions, pricePoint, amount, segment'],
+  ['PipelineDeal', 'Overview (Pipeline by stage, Deal donut by count) + Pipeline tab', 'id, name, acv, closeDate (YYYY-MM), stage?, segment'],
+  ['ACVByMonth', 'Optional – pre-aggregated ACV by month (or derived from PipelineDeal)', 'month, monthKey (YYYY-MM), totalACV'],
+  ['ClientWinsPoint', 'Overview cumulative chart (Client wins metric) + Pipeline tab', 'period (e.g. Jan 2026), wins'],
   ['ClientDeal', 'Accounts tab – table', 'id, dealName, closeDate (YYYY-MM-DD), segment, acv, estimatedTransactionsPerMonth, dealOwner'],
-  ['QuarterDeal', 'Quarter tabs – table & chart', 'id, clientName, dealName, closeDate, segment, acv, arrForecast, annualizedTransactionForecast, dealOwner, targetAccount, latestNextSteps, confidenceQuarterClose (0-100)'],
+  ['QuarterDeal', 'Quarter tabs – table & chart', 'id, clientName, dealName, closeDate, segment, acv, arrForecast, annualizedTransactionForecast, dealOwner, targetAccount (true/false), latestNextSteps, confidenceQuarterClose (0-100)'],
   ['', '', ''],
   ['Segment values (for segment field):', '', SEGMENT_OPTIONS.join(' | ')],
+  ['Stage values (for PipelineDeal.stage):', '', 'Qualification, Discovery, Proposal, Negotiation, Closed Won'],
 ];
 addSheetFromRows(workbook, 'Reference', referenceRows);
 
@@ -161,5 +201,16 @@ addSheet(workbook, 'QuarterDeal', [
   { id: 'q1-2', clientName: 'Beta Inc', dealName: 'Beta Inc – Enterprise', closeDate: '2026-03-05', segment: 'Bank & Bank Tech', acv: 95000, arrForecast: 88000, annualizedTransactionForecast: 80000, dealOwner: 'Alex Morgan', targetAccount: false, latestNextSteps: 'Demo completed. Sending proposal.', confidenceQuarterClose: 70 },
 ]);
 
-XLSX.writeFile(workbook, outPath);
-console.log('Created:', outPath);
+try {
+  XLSX.writeFile(workbook, outPath);
+  console.log('Created:', outPath);
+} catch (err) {
+  if (err && err.code === 'EBUSY') {
+    const fallback = join(__dirname, '..', 'Data_Structures_Reference_new.xlsx');
+    XLSX.writeFile(workbook, fallback);
+    console.log('Original file is in use. Created:', fallback);
+    console.log('Close Data_Structures_Reference.xlsx and run again to overwrite, or rename the _new file.');
+  } else {
+    throw err;
+  }
+}

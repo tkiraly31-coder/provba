@@ -54,6 +54,24 @@ The dashboard uses mock commercial data generated automatically. The data includ
 
 To use real data, replace the `generateMockData()` function in `src/data/generateData.ts` with your actual data source.
 
+### Sales dashboard – Excel & Google Sheets
+
+The **Sales** view (Overview, Forecast, Pipeline, Accounts, Quarter tabs) can use data from **Google Sheets**:
+
+1. **Create the Excel template** (includes all sheet names and column headers):
+   ```bash
+   npm run create-data-excel
+   ```
+   This creates `Data_Structures_Reference.xlsx` in the project root.
+
+2. **Fill in your data** in the Excel (or in Google Sheets after uploading).
+
+3. **Upload to Google Sheets** and **Publish to web** (File → Share → Publish to web, format CSV).
+
+4. **Configure the app**: set `VITE_GOOGLE_SHEETS_ID` in `.env` and the sheet GIDs in `src/data/googleSheetsConfig.ts`.
+
+See **GOOGLE_SHEETS_SETUP.md** for step-by-step instructions and **DATA_STRUCTURES.md** for field names.
+
 ## Project Structure
 
 ```

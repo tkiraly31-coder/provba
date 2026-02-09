@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useSalesData } from '../../contexts/SalesDataContext';
+import { PipelineByStageChart } from './PipelineByStageChart';
 import { PipelineACVChart } from './PipelineACVChart';
 import { ClientWinsLineChart } from './ClientWinsLineChart';
 import { SegmentMultiselect } from './SegmentMultiselect';
@@ -32,6 +33,9 @@ export function PipelineTab() {
         <div className="sales-accounts-filters-row">
           <SegmentMultiselect selectedSegments={selectedSegments} onChange={setSelectedSegments} />
         </div>
+      </div>
+      <div className="sales-chart-wrap sales-chart-wrap-wide">
+        <PipelineByStageChart deals={deals} />
       </div>
       <div className="sales-chart-wrap sales-chart-wrap-wide">
         <PipelineACVChart monthlyData={monthlyData} dealsByMonth={dealsByMonth} />

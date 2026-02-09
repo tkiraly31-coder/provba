@@ -1,16 +1,27 @@
 /**
  * Google Sheets data source config.
  *
- * 1. Upload Data_Structures_Reference.xlsx to Google Sheets (or create a copy there).
- * 2. File → Share → Publish to web → choose "Entire document" or each sheet, format CSV, then Publish.
- * 3. Get your Spreadsheet ID from the URL: docs.google.com/spreadsheets/d/ SPREADSHEET_ID /edit
- * 4. Get each sheet's GID: click the sheet tab, URL ends with #gid=123456 — that number is the GID.
- * 5. Fill in the IDs below. Leave spreadsheetId empty to use mock data.
+ * You can set the Spreadsheet ID via environment variable:
+ *   VITE_GOOGLE_SHEETS_ID=your_spreadsheet_id
+ * (in .env). Otherwise set spreadsheetId below.
+ *
+ * Full steps: see GOOGLE_SHEETS_SETUP.md and the "Instructions" sheet in Data_Structures_Reference.xlsx.
  */
 
+/** Spreadsheet ID: from env VITE_GOOGLE_SHEETS_ID or set fallback below */
+const FALLBACK_SPREADSHEET_ID = '';
+
+function getSpreadsheetId(): string {
+  const env = typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_SHEETS_ID;
+  const fromEnv = env && typeof env === 'string' ? env.trim() : '';
+  return fromEnv || FALLBACK_SPREADSHEET_ID;
+}
+
 export const googleSheetsConfig = {
-  /** From the sheet URL: .../d/THIS_PART/edit */
-  spreadsheetId: '',
+  /** From the sheet URL: .../d/THIS_PART/edit. Or set VITE_GOOGLE_SHEETS_ID in .env */
+  get spreadsheetId(): string {
+    return getSpreadsheetId();
+  },
 
   /** Sheet tab name (in the Excel/Google doc) → GID (number as string). Get GID from URL when you click the tab. */
   sheetGids: {

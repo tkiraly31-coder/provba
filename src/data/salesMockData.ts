@@ -136,7 +136,7 @@ export interface ARRMinimumItem {
 export interface ARRVolumeDrivenItem {
   clientName: string;
   transactions: number;
-  pricePoint: number; // in £
+  pricePoint: number; // in USD
   amount: number;    // transactions * pricePoint
   segment: string;
 }

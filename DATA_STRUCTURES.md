@@ -1,6 +1,6 @@
 # Sales Dashboard – Data Structures Reference
 
-Use these shapes to convert your data so it plugs into the dashboard. All monetary values are in **whole units** (e.g. £1,000 = `1000`). Segment values should match `SEGMENT_OPTIONS` if you use the segment filter.
+Use these shapes to convert your data so it plugs into the dashboard. All monetary values are in **whole units** (e.g. $1,000 = `1000`). Segment values should match `SEGMENT_OPTIONS` if you use the segment filter.
 
 **Segment options (for filter compatibility):**  
 `Bank & Bank Tech` | `Fintechs` | `Gateways` | `Large Merchants` | `HVHM`
@@ -16,8 +16,8 @@ Use these shapes to convert your data so it plugs into the dashboard. All moneta
 
 ```ts
 interface SalesKPIs {
-  forecastARR: number;           // £
-  pipelineValue: number;         // £
+  forecastARR: number;           // $
+  pipelineValue: number;         // $
   closedWon: number;             // count
   winRate: number;               // percentage (e.g. 34 for 34%)
   forecastARRDelta?: number;     // % change
@@ -51,8 +51,8 @@ interface SalesKPIs {
 ```ts
 interface ForecastPoint {
   month: string;    // e.g. "Jul", "Aug", "Jan"
-  forecast: number; // £
-  target: number;   // £
+  forecast: number; // $
+  target: number;   // $
 }
 ```
 
@@ -86,7 +86,7 @@ interface ForecastPointBySegment {
 ```ts
 interface PipelineStage {
   name: string;   // stage label, e.g. "Qualification", "Discovery"
-  value: number; // £ total in that stage
+  value: number; // $ total in that stage
   count: number; // number of deals
 }
 ```
@@ -140,9 +140,9 @@ interface DealSegment {
 ```ts
 interface ARRByMonthPoint {
   month: string;        // "Jan", "Feb", … "Dec"
-  license: number;      // £
-  minimum: number;      // £
-  volumeDriven: number; // £
+  license: number;      // $
+  minimum: number;      // $
+  volumeDriven: number; // $
 }
 
 interface ARRMonthDetail {
@@ -166,7 +166,7 @@ interface ARRMinimumItem {
 interface ARRVolumeDrivenItem {
   clientName: string;
   transactions: number;
-  pricePoint: number;   // £ per transaction
+  pricePoint: number;   // $ per transaction
   amount: number;      // transactions × pricePoint
   segment: string;
 }
@@ -218,7 +218,7 @@ Sums of `license`, `minimum`, and `volumeDriven` in the detail should equal the 
 interface PipelineDeal {
   id: string;
   name: string;
-  acv: number;           // £
+  acv: number;           // $
   closeDate: string;     // "YYYY-MM", e.g. "2026-03"
   stage?: string;        // e.g. "Proposal", "Negotiation", "Closed Won"
   segment: string;       // one of SEGMENT_OPTIONS
@@ -257,7 +257,7 @@ interface PipelineDeal {
 interface ACVByMonth {
   month: string;    // display label, e.g. "Jan 2026"
   monthKey: string; // "YYYY-MM", e.g. "2026-01"
-  totalACV: number; // £ sum of deal ACVs closing that month
+  totalACV: number; // $ sum of deal ACVs closing that month
 }
 ```
 
@@ -304,7 +304,7 @@ interface ClientDeal {
   dealName: string;
   closeDate: string;    // "YYYY-MM-DD"
   segment: string;      // one of SEGMENT_OPTIONS
-  acv: number;          // £
+  acv: number;          // $
   estimatedTransactionsPerMonth: number;
   dealOwner: string;
 }
