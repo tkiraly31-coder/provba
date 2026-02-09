@@ -463,7 +463,7 @@ export function QuarterTab({ tabId }: QuarterTabProps) {
               <Bar dataKey="baseline" name="baseline" stackId="wf" fill="transparent" radius={[0, 0, 0, 0]} legendType="none" />
               <Bar dataKey="signed" name="Signed" stackId="wf" fill="var(--sales-chart-1)" radius={[0, 0, 0, 0]} />
               <Bar dataKey="forecasted" name="Forecasted" stackId="wf" fill="var(--sales-chart-3)" radius={[4, 4, 0, 0]}>
-                <LabelList content={renderWaterfallLabel} position="top" />
+                <LabelList content={renderWaterfallLabel as any} position="top" />
               </Bar>
               <Bar
                 dataKey="target"
@@ -482,7 +482,7 @@ export function QuarterTab({ tabId }: QuarterTabProps) {
                     }
                   />
                 ))}
-                <LabelList content={renderTargetLabel} position="top" />
+                <LabelList content={renderTargetLabel as any} position="top" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
